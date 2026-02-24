@@ -82,9 +82,90 @@
                 android:layout_width="match_parent"
                 android:layout_height="44dp"
                 android:layout_marginTop="8dp"
-                android:text="Свайп — выбрать фазу. Для запроса РУ - нажмите РУ. Для вызова фазы - кнопка снизу"
+                android:text="Для запроса РУ - нажмите РУ. Вызов фаз — кнопками 1-8"
                 android:textColor="#A7B3C9"
                 android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/phaseButtonsRow"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton1"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="1"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton2"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="2"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton3"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="3"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton4"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="4"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton5"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="5"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton6"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="6"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton7"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="7"
+                    app:cornerRadius="999dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/phaseButton8"
+                    style="@style/Widget.Material3.Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:layout_marginHorizontal="3dp"
+                    android:text="8"
+                    app:cornerRadius="999dp" />
+            </LinearLayout>
             <TextView
                 android:id="@+id/manualTimerTextView"
                 android:layout_width="wrap_content"
@@ -137,20 +218,6 @@
                 android:textSize="13sp"
                 android:background="#263554"/>
 
-            <!-- КРУГЛАЯ КНОПКА АКТИВАЦИИ ФАЗЫ -->
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/activateButton"
-                android:layout_width="110dp"
-                android:layout_height="118dp"
-                android:layout_gravity="bottom|center_horizontal"
-                android:layout_marginBottom="16dp"
-                android:backgroundTint="#2EE59D"
-                android:enabled="false"
-                android:text=""
-                app:cornerRadius="999dp"
-                app:icon="@android:drawable/ic_lock_power_off"
-                app:iconGravity="textTop"
-                app:iconTint="#0B1220" />
         </FrameLayout>
 
     </com.google.android.material.card.MaterialCardView>
