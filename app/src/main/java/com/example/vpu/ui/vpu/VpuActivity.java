@@ -9,7 +9,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -38,7 +37,7 @@ public class VpuActivity extends AppCompatActivity {
     private TextView manualTimerTextView;
     private MaterialButton manualButton;
     private ImageView wifiIcon;
-    private MaterialButton activateButton;
+    private MaterialButton[] phaseButtons;
 
     // Data
     private int objectId;
@@ -85,7 +84,7 @@ public class VpuActivity extends AppCompatActivity {
             stopRuTimer();
             safeManualOff();
             setManualButtonState(manualAllowed, false);
-            updateActivateButtonState();
+            updatePhaseButtonsUi();
             updateManualTimerUi(); // покажет "—"
             Toast.makeText(this, "РУ отключено по таймеру", Toast.LENGTH_SHORT).show();
         }
@@ -104,8 +103,9 @@ public class VpuActivity extends AppCompatActivity {
     // Colors
     private static final int COLOR_OK = 0xFF2EE59D;       // green
     private static final int COLOR_BAD = 0xFFFF6B6B;      // red
-    private static final int COLOR_NEUTRAL_BG = 0xFF263554;
+    private static final int COLOR_PHASE_DIM = 0xFF1D7A56;
     private static final int COLOR_TEXT_DARK = 0xFF0B1220;
+    private static final int COLOR_TEXT_LIGHT = 0xFFE8EEF9;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -128,7 +128,16 @@ public class VpuActivity extends AppCompatActivity {
         manualTimerTextView = findViewById(R.id.manualTimerTextView);
         manualButton = findViewById(R.id.manualButton);
         wifiIcon = findViewById(R.id.wifiIcon);
-        activateButton = findViewById(R.id.activateButton);
+        phaseButtons = new MaterialButton[] {
+                findViewById(R.id.phaseButton1),
+                findViewById(R.id.phaseButton2),
+                findViewById(R.id.phaseButton3),
+                findViewById(R.id.phaseButton4),
+                findViewById(R.id.phaseButton5),
+                findViewById(R.id.phaseButton6),
+                findViewById(R.id.phaseButton7),
+                findViewById(R.id.phaseButton8)
+        };
 
         // API
         piApi = PiRetrofitClient.getInstance().create(PiApiService.class);
@@ -143,7 +152,7 @@ public class VpuActivity extends AppCompatActivity {
         updateStatusText(viewPager.getCurrentItem() + 1, currentPhaseFromPi);
         setWifiConnected(false);
         setManualButtonState(false, false);
-        updateActivateButtonState();
+        updatePhaseButtonsUi();
         updateManualTimerUi();
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
@@ -152,12 +161,12 @@ public class VpuActivity extends AppCompatActivity {
                 // reset таймера уже будет через onUserInteraction(), но оставим обновление UI
                 updatePageText(position);
                 updateStatusText(position + 1, currentPhaseFromPi);
-                updateActivateButtonState();
+                updatePhaseButtonsUi();
             }
         });
 
         manualButton.setOnClickListener(v -> onManualClicked());
-        activateButton.setOnClickListener(v -> onActivateClicked());
+        initPhaseButtons();
     }
 
     /**
@@ -249,7 +258,7 @@ public class VpuActivity extends AppCompatActivity {
 
                     setManualButtonState(manualAllowed, wantManualRequest && manualRequestActive);
 
-                    updateActivateButtonState();
+                    updatePhaseButtonsUi();
                     checkConfirmation();
 
                     scheduleNextPoll();
@@ -286,7 +295,7 @@ public class VpuActivity extends AppCompatActivity {
         setManualButtonState(manualAllowed, shownManualActive);
 
         setManualButtonState(false, false);
-        updateActivateButtonState();
+        updatePhaseButtonsUi();
     }
 
     // ---------------- RU Auto-off ----------------
@@ -372,20 +381,30 @@ public class VpuActivity extends AppCompatActivity {
         }
     }
 
-    private void updateActivateButtonState() {
-        if (activateButton == null) return;
+    private void initPhaseButtons() {
+        for (int i = 0; i < phaseButtons.length; i++) {
+            final int phase = i + 1;
+            phaseButtons[i].setOnClickListener(v -> onPhaseButtonClicked(phase));
+        }
+    }
+
+    private void updatePhaseButtonsUi() {
+        if (phaseButtons == null) return;
 
         boolean enabled = manualAllowed && wantManualRequest && !commandInProgress && consecutiveFails < 3;
-        activateButton.setEnabled(enabled);
+        for (int i = 0; i < phaseButtons.length; i++) {
+            MaterialButton button = phaseButtons[i];
+            int phase = i + 1;
+            boolean active = currentPhaseFromPi == phase;
 
-        if (enabled) {
-            activateButton.setBackgroundTintList(ColorStateList.valueOf(COLOR_OK));
-            activateButton.setIconTint(ColorStateList.valueOf(COLOR_TEXT_DARK));
-            activateButton.setAlpha(1.0f);
-        } else {
-            activateButton.setBackgroundTintList(ColorStateList.valueOf(COLOR_NEUTRAL_BG));
-            activateButton.setIconTint(ColorStateList.valueOf(0xFFA7B3C9));
-            activateButton.setAlpha(0.95f);
+            button.setEnabled(enabled);
+            button.setBackgroundTintList(ColorStateList.valueOf(active ? COLOR_OK : COLOR_PHASE_DIM));
+            button.setTextColor(active ? COLOR_TEXT_DARK : COLOR_TEXT_LIGHT);
+            button.setAlpha(active ? 1.0f : 0.7f);
+
+            if (!enabled) {
+                button.setAlpha(active ? 0.5f : 0.35f);
+            }
         }
     }
 
@@ -404,7 +423,7 @@ public class VpuActivity extends AppCompatActivity {
 
             safeManualOff(); // async
             setManualButtonState(true, false);
-            updateActivateButtonState();
+            updatePhaseButtonsUi();
             return;
         }
         manualOptimisticUntilMs = System.currentTimeMillis() + MANUAL_OPTIMISTIC_MS;
@@ -417,32 +436,28 @@ public class VpuActivity extends AppCompatActivity {
         safeManualOn();
         resetRuTimerIfNeeded();
         setManualButtonState(true, true);
-        updateActivateButtonState();
+        updatePhaseButtonsUi();
 
         safeManualOn();
     }
 
-    private void onActivateClicked() {
+    private void onPhaseButtonClicked(int phaseToActivate) {
         resetRuTimerIfNeeded();
 
-        if (!manualAllowed || !wantManualRequest) return;
-        if (commandInProgress) return;
+        if (!manualAllowed || !wantManualRequest || commandInProgress) return;
 
-        int phaseToActivate = viewPager.getCurrentItem() + 1;
+        if (phaseToActivate - 1 < imageUrls.size()) {
+            viewPager.setCurrentItem(phaseToActivate - 1, true);
+        }
 
-        new AlertDialog.Builder(this)
-                .setTitle("Подтверждение")
-                .setMessage("Включить фазу " + phaseToActivate + "?")
-                .setPositiveButton("Включить", (dialog, which) -> sendActivate(phaseToActivate))
-                .setNegativeButton("Отмена", (dialog, which) -> dialog.dismiss())
-                .show();
+        sendActivate(phaseToActivate);
     }
 
     private void sendActivate(int phase) {
         commandInProgress = true;
         pendingPhase = phase;
         pendingUntilMs = System.currentTimeMillis() + CONFIRM_TIMEOUT_MS;
-        updateActivateButtonState();
+        updatePhaseButtonsUi();
 
         // единственное уведомление по ТЗ
         Toast.makeText(this, "Команда отправлена", Toast.LENGTH_SHORT).show();
@@ -453,7 +468,7 @@ public class VpuActivity extends AppCompatActivity {
                 if (!response.isSuccessful() || response.body() == null || !response.body().accepted) {
                     commandInProgress = false;
                     pendingPhase = -1;
-                    updateActivateButtonState();
+                    updatePhaseButtonsUi();
                 }
             }
 
@@ -461,7 +476,7 @@ public class VpuActivity extends AppCompatActivity {
             public void onFailure(Call<ActivateResponse> call, Throwable t) {
                 commandInProgress = false;
                 pendingPhase = -1;
-                updateActivateButtonState();
+                updatePhaseButtonsUi();
             }
         });
     }
@@ -472,14 +487,14 @@ public class VpuActivity extends AppCompatActivity {
         if (currentPhaseFromPi == pendingPhase) {
             commandInProgress = false;
             pendingPhase = -1;
-            updateActivateButtonState();
+            updatePhaseButtonsUi();
             return;
         }
 
         if (System.currentTimeMillis() > pendingUntilMs) {
             commandInProgress = false;
             pendingPhase = -1;
-            updateActivateButtonState();
+            updatePhaseButtonsUi();
         }
     }
 
