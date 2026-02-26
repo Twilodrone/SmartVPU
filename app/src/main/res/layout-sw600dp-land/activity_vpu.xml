@@ -14,7 +14,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.36" />
+        app:layout_constraintGuide_percent="0.45" />
 
     <!-- Левая колонка: статус -->
     <com.google.android.material.card.MaterialCardView
@@ -70,31 +70,61 @@
             <!-- Строка: статус + РУ + WiFi -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="82dp"
                 android:layout_marginTop="10dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/statusTextView"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Объект: ---  •  Фаза: ---"
+                    android:layout_weight="0"
+                    android:text="Объект: ---  •  Текущая: ---"
                     android:textColor="#E8EEF9"
                     android:textSize="18sp"
-                    android:textStyle="bold"/>
+                    android:textStyle="bold" />
 
                 <com.google.android.material.switchmaterial.SwitchMaterial
                     android:id="@+id/manualToggle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:text="РУ"
+                    android:layout_marginStart="50dp"
+                    android:rotation="270"
+                    android:scaleX="1.5"
+                    android:scaleY="1.5"
+
                     android:textColor="#E8EEF9"
                     android:textStyle="bold" />
-            </LinearLayout>
 
+                <TextView
+                    android:id="@+id/ruTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="left"
+                    android:text="РУ"
+                    android:textColor="#E8EEF9"
+                    android:textSize="30sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+                <TextView
+                    android:id="@+id/addressTextView"
+                    android:layout_width="250dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0"
+                    android:text="Адрес:"
+                    android:textColor="#E8EEF9"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+            </LinearLayout>
             <TextView
                 android:id="@+id/hintTextView"
                 android:layout_width="match_parent"
@@ -115,8 +145,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton1"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="1"
                     app:cornerRadius="999dp" />
@@ -124,17 +154,16 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton2"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="2"
                     app:cornerRadius="999dp" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton3"
-                    style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="3"
                     app:cornerRadius="999dp" />
@@ -142,8 +171,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton4"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="4"
                     app:cornerRadius="999dp" />
@@ -159,8 +188,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton5"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="5"
                     app:cornerRadius="999dp" />
@@ -168,8 +197,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton6"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="6"
                     app:cornerRadius="999dp" />
@@ -177,8 +206,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton7"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="7"
                     app:cornerRadius="999dp" />
@@ -186,8 +215,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton8"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="65dp"
-                    android:layout_height="70dp"
+                    android:layout_width="85dp"
+                    android:layout_height="90dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="8"
                     app:cornerRadius="999dp" />

@@ -34,6 +34,7 @@ public class VpuActivity extends AppCompatActivity {
     // UI
     private ViewPager2 viewPager;
     private TextView statusTextView;
+    private TextView addressTextView;
     private TextView pageTextView;
     private TextView manualTimerTextView;
     private SwitchMaterial manualToggle;
@@ -127,6 +128,7 @@ public class VpuActivity extends AppCompatActivity {
 
         // UI
         statusTextView = findViewById(R.id.statusTextView);
+        addressTextView = findViewById(R.id.addressTextView);
         viewPager = findViewById(R.id.viewPager);
         pageTextView = findViewById(R.id.pageTextView);
         manualTimerTextView = findViewById(R.id.manualTimerTextView);
@@ -372,15 +374,9 @@ public class VpuActivity extends AppCompatActivity {
         if (piPhase == -1) pi = "КОНФЛИКТ";
         else if (piPhase == 0) pi = "—";
         else pi = String.valueOf(piPhase);
-
-        if (address != null && !address.isEmpty()) {
-            statusTextView.setText("Объект: " + objectId +
-                    " • Текущая: " + pi +
-                    "\n\n" + address);
-        } else {
-            statusTextView.setText("Объект: " + objectId +
-                    " • Текущая: " + pi);
-        }
+        statusTextView.setText("Объект: " + objectId +
+                " • Текущая: " + pi);
+        addressTextView.setText(address);
     }
 
     private void initPhaseButtons() {
