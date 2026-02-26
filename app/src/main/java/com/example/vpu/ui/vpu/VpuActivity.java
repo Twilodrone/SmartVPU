@@ -20,6 +20,7 @@ import com.example.vpu.network.dto.ActivateRequest;
 import com.example.vpu.network.dto.ActivateResponse;
 import com.example.vpu.network.dto.PiStatusResponse;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.switchmaterial.SwitchMaterial;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -35,7 +36,7 @@ public class VpuActivity extends AppCompatActivity {
     private TextView statusTextView;
     private TextView pageTextView;
     private TextView manualTimerTextView;
-    private MaterialButton manualButton;
+    private SwitchMaterial manualToggle;
     private ImageView wifiIcon;
     private MaterialButton[] phaseButtons;
 
@@ -105,7 +106,10 @@ public class VpuActivity extends AppCompatActivity {
     private static final int COLOR_BAD = 0xFFFF6B6B;      // red
     private static final int COLOR_PHASE_DIM = 0xFF1D7A56;
     private static final int COLOR_TEXT_DARK = 0xFF0B1220;
+    private static final int COLOR_SURFACE_DIM = 0xFF5C6A82;
     private static final int COLOR_TEXT_LIGHT = 0xFFE8EEF9;
+
+    private boolean manualToggleInternalUpdate = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -126,7 +130,7 @@ public class VpuActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         pageTextView = findViewById(R.id.pageTextView);
         manualTimerTextView = findViewById(R.id.manualTimerTextView);
-        manualButton = findViewById(R.id.manualButton);
+        manualToggle = findViewById(R.id.manualToggle);
         wifiIcon = findViewById(R.id.wifiIcon);
         phaseButtons = new MaterialButton[] {
                 findViewById(R.id.phaseButton1),
@@ -165,7 +169,10 @@ public class VpuActivity extends AppCompatActivity {
             }
         });
 
-        manualButton.setOnClickListener(v -> onManualClicked());
+        manualToggle.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            if (manualToggleInternalUpdate) return;
+            onManualToggled(isChecked);
+        });
         initPhaseButtons();
     }
 
@@ -293,8 +300,6 @@ public class VpuActivity extends AppCompatActivity {
         boolean shownManualActive = optimisticActive || (wantManualRequest && manualRequestActive);
 
         setManualButtonState(manualAllowed, shownManualActive);
-
-        setManualButtonState(false, false);
         updatePhaseButtonsUi();
     }
 
@@ -342,20 +347,19 @@ public class VpuActivity extends AppCompatActivity {
     }
 
     private void setManualButtonState(boolean allowed, boolean requestActive) {
-        if (manualButton == null) return;
+        if (manualToggle == null) return;
 
-        // кнопку НЕ отключаем
-        manualButton.setEnabled(true);
+        manualToggleInternalUpdate = true;
+        manualToggle.setChecked(allowed && requestActive);
+        manualToggleInternalUpdate = false;
 
-        if (allowed) {
-            manualButton.setBackgroundTintList(ColorStateList.valueOf(COLOR_OK));
-            manualButton.setTextColor(COLOR_TEXT_DARK);
-            manualButton.setAlpha(requestActive ? 1.0f : 0.85f);
-        } else {
-            manualButton.setBackgroundTintList(ColorStateList.valueOf(COLOR_BAD));
-            manualButton.setTextColor(COLOR_TEXT_DARK);
-            manualButton.setAlpha(1.0f);
-        }
+        int thumbColor = allowed ? COLOR_OK : COLOR_BAD;
+        int trackColor = allowed ? COLOR_PHASE_DIM : COLOR_SURFACE_DIM;
+
+        manualToggle.setThumbTintList(ColorStateList.valueOf(thumbColor));
+        manualToggle.setTrackTintList(ColorStateList.valueOf(trackColor));
+        manualToggle.setTextColor(allowed ? COLOR_TEXT_LIGHT : COLOR_SURFACE_DIM);
+        manualToggle.setAlpha(allowed ? 1.0f : 0.9f);
     }
 
     private void updatePageText(int position) {
@@ -408,9 +412,9 @@ public class VpuActivity extends AppCompatActivity {
 
     // ---------------- Actions ----------------
 
-    private void onManualClicked() {
+    private void onManualToggled(boolean enabled) {
 
-        if (wantManualRequest) {
+        if (!enabled) {
             // выключаем
             wantManualRequest = false;
             stopRuTimer();
@@ -426,7 +430,6 @@ public class VpuActivity extends AppCompatActivity {
         }
         manualOptimisticUntilMs = System.currentTimeMillis() + MANUAL_OPTIMISTIC_MS;
 
-        // включаем
         wantManualRequest = true;
         manualOffInProgress = false;
         manualOffGuardUntilMs = 0;
@@ -435,8 +438,6 @@ public class VpuActivity extends AppCompatActivity {
         resetRuTimerIfNeeded();
         setManualButtonState(true, true);
         updatePhaseButtonsUi();
-
-        safeManualOn();
     }
 
     private void onPhaseButtonClicked(int phaseToActivate) {

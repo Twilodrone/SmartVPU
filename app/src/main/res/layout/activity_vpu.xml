@@ -21,43 +21,44 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
-
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="14dp">
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal"
-            android:padding="14dp">
 
-            <TextView
-                android:id="@+id/titleTextView"
-                android:layout_width="504dp"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ВПУ • Управление фазами"
-                android:textColor="#E8EEF9"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-            <ImageView
-                android:id="@+id/wifiIcon"
-                android:layout_width="35dp"
-                android:layout_height="45dp"
-                android:layout_marginStart="12dp"
-                android:src="@drawable/wifi_icon"
-                app:tint="#FF6B6B" />
-        </LinearLayout>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-            <!-- строка статус + РУ + WiFi -->
+                <TextView
+                    android:id="@+id/titleTextView"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ВПУ • Управление фазами"
+                    android:textColor="#E8EEF9"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/wifiIcon"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_marginStart="12dp"
+                    android:src="@drawable/wifi_icon"
+                    app:tint="#FF6B6B" />
+            </LinearLayout>
+
+            <!-- строка статус + РУ -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <TextView
                     android:id="@+id/statusTextView"
@@ -69,26 +70,21 @@
                     android:textSize="18sp"
                     android:textStyle="bold"/>
 
-                <!-- Кнопка РУ -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/manualButton"
-                    android:layout_width="78dp"
-                    android:layout_height="73dp"
+                <com.google.android.material.switchmaterial.SwitchMaterial
+                    android:id="@+id/manualToggle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:layout_marginStart="8dp"
-                    android:backgroundTint="#FF6B6B"
                     android:text="РУ"
-                    android:textColor="#0B1220"
-                    android:textStyle="bold"
-                    app:cornerRadius="999dp" />
-
-                <!-- WiFi иконка -->
+                    android:textColor="#E8EEF9"
+                    android:textStyle="bold" />
 
             </LinearLayout>
 
             <TextView
                 android:id="@+id/hintTextView"
                 android:layout_width="match_parent"
-                android:layout_height="44dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:text="Для запроса РУ - нажмите РУ. Вызов фаз — кнопками 1-8"
                 android:textColor="#A7B3C9"
