@@ -371,12 +371,10 @@ public class VpuActivity extends AppCompatActivity {
 
         if (address != null && !address.isEmpty()) {
             statusTextView.setText("Объект: " + objectId +
-                    " • Выбор: " + shownPhase +
                     " • Текущая: " + pi +
                     "\n\n" + address);
         } else {
             statusTextView.setText("Объект: " + objectId +
-                    " • Выбор: " + shownPhase +
                     " • Текущая: " + pi);
         }
     }

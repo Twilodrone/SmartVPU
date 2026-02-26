@@ -41,15 +41,31 @@
             android:orientation="vertical"
             android:padding="14dp">
 
-            <TextView
-                android:id="@+id/titleTextView"
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="ВПУ • Управление фазами"
-                android:textColor="#E8EEF9"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
+                android:layout_height="56dp"
+                android:orientation="horizontal"
+                android:padding="14dp">
 
+                <TextView
+                    android:id="@+id/titleTextView"
+                    android:layout_width="241dp"
+                    android:layout_height="wrap_content"
+                    android:text="ВПУ • Управление фазами"
+                    android:textColor="#E8EEF9"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+                <!-- WiFi иконка (индикатор связи) -->
+                <ImageView
+                    android:id="@+id/wifiIcon"
+                    android:layout_width="25dp"
+                    android:layout_height="25dp"
+                    android:layout_marginStart="12dp"
+                    android:contentDescription="Wi-Fi"
+                    android:src="@drawable/wifi_icon"
+                    app:tint="#FF6B6B" />
+
+            </LinearLayout>
             <!-- Строка: статус + РУ + WiFi -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -83,16 +99,6 @@
                     android:textColor="#0B1220"
                     android:textStyle="bold"
                     app:cornerRadius="999dp" />
-
-                <!-- WiFi иконка (индикатор связи) -->
-                <ImageView
-                    android:id="@+id/wifiIcon"
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:layout_marginStart="12dp"
-                    android:contentDescription="Wi-Fi"
-                    android:src="@android:drawable/ic_lock_idle_charging"
-                    app:tint="#FF6B6B" />
             </LinearLayout>
 
             <TextView
@@ -115,8 +121,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton1"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="1"
                     app:cornerRadius="999dp" />
@@ -124,8 +130,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton2"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="2"
                     app:cornerRadius="999dp" />
@@ -133,8 +139,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton3"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="3"
                     app:cornerRadius="999dp" />
@@ -142,17 +148,25 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton4"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="4"
                     app:cornerRadius="999dp" />
+            </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/phaseButtonsRow2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:orientation="horizontal">
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton5"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="5"
                     app:cornerRadius="999dp" />
@@ -160,8 +174,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton6"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="6"
                     app:cornerRadius="999dp" />
@@ -169,8 +183,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton7"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="7"
                     app:cornerRadius="999dp" />
@@ -178,8 +192,8 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton8"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="65dp"
+                    android:layout_height="70dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="8"
                     app:cornerRadius="999dp" />
@@ -207,6 +221,7 @@
                 android:text="РУ: красный — запрет, зелёный — разрешено"
                 android:textColor="#A7B3C9"
                 android:textSize="12sp"/>
+
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
