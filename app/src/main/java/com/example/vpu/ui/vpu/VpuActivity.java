@@ -119,7 +119,10 @@ public class VpuActivity extends AppCompatActivity {
 
         objectId = getIntent().getIntExtra("objectId", -1);
         imageUrls = getIntent().getStringArrayListExtra("images");
-        address = "Лесной 2-й переулок, Бутырский Вал"; // пока хардкод
+        address = getIntent().getStringExtra("address");
+        if (address == null || address.trim().isEmpty()) {
+            address = "Адрес не указан";
+        }
 
         if (objectId == -1 || imageUrls == null || imageUrls.isEmpty()) {
             finish();
@@ -245,6 +248,9 @@ public class VpuActivity extends AppCompatActivity {
                     currentPhaseFromPi = st.currentPhase;
                     manualAllowed = st.manualAllowed;
                     manualRequestActive = st.manualRequestActive;
+                    if (st.address != null && !st.address.trim().isEmpty()) {
+                        address = st.address;
+                    }
 
                     setWifiConnected(true);
 

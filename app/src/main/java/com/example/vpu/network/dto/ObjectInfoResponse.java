@@ -6,11 +6,10 @@ import java.util.List;
 
 public class ObjectInfoResponse {
 
-    @SerializedName("object_id")
+    @SerializedName("objectId")
     public int objectId;
 
     public String address;
-
+    public String version;
     public List<String> images;
 }
-
