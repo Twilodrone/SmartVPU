@@ -1,9 +1,11 @@
 import time
 import threading
+from pathlib import Path
 from collections import deque
 from typing import Dict, List, Tuple, Optional
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 import warnings
@@ -13,8 +15,13 @@ from gpiozero import DigitalInputDevice, DigitalOutputDevice, Device
 
 app = FastAPI()
 
+# ====== FILE STORAGE ======
+STORAGE_DIR = Path(__file__).resolve().parent / "storage"
+app.mount("/files", StaticFiles(directory=str(STORAGE_DIR)), name="files")
+
 # ====== НАСТРОЙКИ ======
 OBJECT_ID = 3649
+OBJECT_ADDRESS = "Лесной 2-й переулок, Бутырский Вал"
 PULSE_SECONDS = 2.0            # 2 секунды
 MIN_COMMAND_INTERVAL = 0.5     # антиспам команд
 INPUT_BOUNCE = 0.03            # антидребезг входов
@@ -85,6 +92,35 @@ last_manual_request: Optional[bool] = None
 
 class ActivateRequest(BaseModel):
     phase: int
+
+
+class ObjectInfoResponse(BaseModel):
+    objectId: int
+    address: str
+    version: str
+    images: List[str]
+
+
+def pick_latest_version_dir(obj_dir: Path) -> Optional[Path]:
+    versions = [p for p in obj_dir.iterdir() if p.is_dir()]
+    if not versions:
+        return None
+    return sorted(versions, key=lambda p: p.name)[-1]
+
+
+def list_images(version_dir: Path) -> List[Path]:
+    allowed = {".jpg"}
+    files = [p for p in version_dir.iterdir() if p.is_file() and p.suffix.lower() in allowed]
+
+    def sort_key(p: Path):
+        stem = p.stem
+        return (0, int(stem)) if stem.isdigit() else (1, stem)
+
+    return sorted(files, key=sort_key)
+
+
+def base_url(req: Request) -> str:
+    return str(req.base_url).rstrip("/")
 
 
 def get_device_id(req: Request) -> str:
@@ -380,6 +416,7 @@ def status(req: Request):
         "serverTag": "GPIO_MAIN_V4_HOLD_AFTER_ACTIVATE",
         "ready": True,
         "objectId": OBJECT_ID,
+        "address": OBJECT_ADDRESS,
 
         "currentPhase": stable_phase,
         "inputsActive": stable_active,
@@ -397,6 +434,37 @@ def status(req: Request):
         "ts": int(now),
         "pinFactory": type(Device.pin_factory).__name__ if Device.pin_factory else None,
     }
+
+
+@app.get("/api/objects/{object_id}", response_model=ObjectInfoResponse)
+def get_object(object_id: int, request: Request, version: Optional[str] = None):
+    obj_dir = STORAGE_DIR / str(object_id)
+    if not obj_dir.exists() or not obj_dir.is_dir():
+        raise HTTPException(status_code=404, detail="Object not found")
+
+    if version:
+        version_dir = obj_dir / version
+        if not version_dir.exists() or not version_dir.is_dir():
+            raise HTTPException(status_code=404, detail="Version not found")
+    else:
+        version_dir = pick_latest_version_dir(obj_dir)
+        if version_dir is None:
+            raise HTTPException(status_code=404, detail="No versions for object")
+
+    imgs = list_images(version_dir)
+    if not imgs:
+        raise HTTPException(status_code=404, detail="No images in version directory")
+
+    b = base_url(request)
+    ver = version_dir.name
+    urls = [f"{b}/files/{object_id}/{ver}/{p.name}" for p in imgs]
+
+    return ObjectInfoResponse(objectId=object_id, address=OBJECT_ADDRESS, version=ver, images=urls)
+
+
+@app.get("/api/health")
+def health():
+    return {"ok": True}
 
 
 @app.post("/api/manual/on")

@@ -78,8 +78,11 @@ public class MainActivity extends AppCompatActivity {
         images.add(base + "2.jpg");
         images.add(base + "3.jpg");
 
+        String address = "Лесной 2-й переулок, Бутырский Вал";
+
         Intent intent = new Intent(this, VpuActivity.class);
         intent.putExtra("objectId", objectId);
+        intent.putExtra("address", address);
         intent.putStringArrayListExtra("images", images);
         startActivity(intent);
     }

@@ -7,5 +7,6 @@ public class PiStatusResponse {
     public boolean ready;
     public boolean manualAllowed;
     public boolean manualRequestActive;
+    public String address;
 }
 
