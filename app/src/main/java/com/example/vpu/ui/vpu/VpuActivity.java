@@ -126,6 +126,10 @@ public class VpuActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vpu);
 
+        if (savedInstanceState != null) {
+            activePhaseCallSwitch = savedInstanceState.getInt(STATE_ACTIVE_PHASE_CALL_SWITCH, 0);
+        }
+
         objectId = getIntent().getIntExtra("objectId", -1);
         imageUrls = getIntent().getStringArrayListExtra("images");
         address = getIntent().getStringExtra("address");
@@ -211,6 +215,12 @@ public class VpuActivity extends AppCompatActivity {
     public void onUserInteraction() {
         super.onUserInteraction();
         resetRuTimerIfNeeded();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_ACTIVE_PHASE_CALL_SWITCH, activePhaseCallSwitch);
     }
 
     @Override
