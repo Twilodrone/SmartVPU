@@ -38,6 +38,7 @@ public class VpuActivity extends AppCompatActivity {
     private TextView pageTextView;
     private TextView manualTimerTextView;
     private SwitchMaterial manualToggle;
+    private SwitchMaterial[] phaseCallSwitches;
     private ImageView wifiIcon;
     private MaterialButton[] phaseButtons;
 
@@ -106,11 +107,13 @@ public class VpuActivity extends AppCompatActivity {
     private static final int COLOR_OK = 0xFF2EE59D;       // green
     private static final int COLOR_BAD = 0xFFFF6B6B;      // red
     private static final int COLOR_PHASE_DIM = 0xFF1D7A56;
+    private static final int COLOR_VIEWING_STROKE = 0xFFFFD54F;
     private static final int COLOR_TEXT_DARK = 0xFF0B1220;
     private static final int COLOR_SURFACE_DIM = 0xFF5C6A82;
     private static final int COLOR_TEXT_LIGHT = 0xFFE8EEF9;
 
     private boolean manualToggleInternalUpdate = false;
+    private boolean phaseSwitchesInternalUpdate = false;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -147,6 +150,16 @@ public class VpuActivity extends AppCompatActivity {
                 findViewById(R.id.phaseButton7),
                 findViewById(R.id.phaseButton8)
         };
+        phaseCallSwitches = new SwitchMaterial[] {
+                findViewById(R.id.phaseCallSwitch1),
+                findViewById(R.id.phaseCallSwitch2),
+                findViewById(R.id.phaseCallSwitch3),
+                findViewById(R.id.phaseCallSwitch4),
+                findViewById(R.id.phaseCallSwitch5),
+                findViewById(R.id.phaseCallSwitch6),
+                findViewById(R.id.phaseCallSwitch7),
+                findViewById(R.id.phaseCallSwitch8)
+        };
 
         // API
         piApi = PiRetrofitClient.getInstance().create(PiApiService.class);
@@ -179,6 +192,7 @@ public class VpuActivity extends AppCompatActivity {
             onManualToggled(isChecked);
         });
         initPhaseButtons();
+        initPhaseCallSwitches();
     }
 
     /**
@@ -392,23 +406,44 @@ public class VpuActivity extends AppCompatActivity {
         }
     }
 
+    private void initPhaseCallSwitches() {
+        for (int i = 0; i < phaseCallSwitches.length; i++) {
+            final int phase = i + 1;
+            phaseCallSwitches[i].setOnCheckedChangeListener((buttonView, isChecked) -> {
+                if (phaseSwitchesInternalUpdate || !isChecked) return;
+                onPhaseSwitchActivated(phase);
+                phaseSwitchesInternalUpdate = true;
+                buttonView.setChecked(false);
+                phaseSwitchesInternalUpdate = false;
+            });
+        }
+    }
+
     private void updatePhaseButtonsUi() {
         if (phaseButtons == null) return;
 
-        boolean enabled = manualAllowed && wantManualRequest && !commandInProgress && consecutiveFails < 3;
+        int shownPhase = viewPager.getCurrentItem() + 1;
+        boolean enabled = !commandInProgress && consecutiveFails < 3;
+        boolean phaseCallsEnabled = manualAllowed && wantManualRequest && enabled;
         for (int i = 0; i < phaseButtons.length; i++) {
             MaterialButton button = phaseButtons[i];
             int phase = i + 1;
             boolean active = currentPhaseFromPi == phase;
+            boolean shown = shownPhase == phase;
+            int color = active ? COLOR_OK : COLOR_PHASE_DIM;
 
-            button.setEnabled(enabled);
-            button.setBackgroundTintList(ColorStateList.valueOf(active ? COLOR_OK : COLOR_PHASE_DIM));
+            button.setEnabled(true);
+            button.setBackgroundTintList(ColorStateList.valueOf(color));
             button.setTextColor(active ? COLOR_TEXT_DARK : COLOR_TEXT_LIGHT);
-            button.setAlpha(active ? 1.0f : 0.7f);
+            button.setStrokeWidth(shown ? 4 : 0);
+            button.setStrokeColor(ColorStateList.valueOf(COLOR_VIEWING_STROKE));
+            button.setAlpha(active || shown ? 1.0f : 0.7f);
 
-            if (!enabled) {
-                button.setAlpha(active ? 0.5f : 0.35f);
-            }
+            SwitchMaterial phaseSwitch = phaseCallSwitches[i];
+            phaseSwitch.setEnabled(phaseCallsEnabled);
+            phaseSwitch.setThumbTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_OK : COLOR_SURFACE_DIM));
+            phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_PHASE_DIM : COLOR_SURFACE_DIM));
+            phaseSwitch.setAlpha(phaseCallsEnabled ? 1.0f : 0.45f);
         }
     }
 
@@ -445,11 +480,15 @@ public class VpuActivity extends AppCompatActivity {
     private void onPhaseButtonClicked(int phaseToActivate) {
         resetRuTimerIfNeeded();
 
-        if (!manualAllowed || !wantManualRequest || commandInProgress) return;
-
         if (phaseToActivate - 1 < imageUrls.size()) {
             viewPager.setCurrentItem(phaseToActivate - 1, true);
         }
+    }
+
+    private void onPhaseSwitchActivated(int phaseToActivate) {
+        resetRuTimerIfNeeded();
+
+        if (!manualAllowed || !wantManualRequest || commandInProgress) return;
 
         sendActivate(phaseToActivate);
     }
