@@ -121,8 +121,6 @@ public class VpuActivity extends AppCompatActivity {
     private boolean phaseSwitchesInternalUpdate = false;
     private int activePhaseCallSwitch = 0;
 
-    private static final String STATE_ACTIVE_PHASE_CALL_SWITCH = "state_active_phase_call_switch";
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -451,14 +449,13 @@ public class VpuActivity extends AppCompatActivity {
         for (int i = 0; i < phaseCallSwitches.length; i++) {
             final int phase = i + 1;
             phaseCallSwitches[i].setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (phaseSwitchesInternalUpdate || !buttonView.isPressed()) return;
+                if (phaseSwitchesInternalUpdate) return;
 
                 if (!isChecked) {
                     onPhaseSwitchDeactivated(phase);
                     return;
                 }
 
-                if (activePhaseCallSwitch == phase) return;
                 onPhaseSwitchActivated(phase);
             });
         }
