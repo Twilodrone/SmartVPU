@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -527,9 +528,20 @@ public class VpuActivity extends AppCompatActivity {
 
         if (!manualAllowed || !wantManualRequest || commandInProgress) return;
 
-        lastCalledPhaseStartedAtMs = System.currentTimeMillis();
-        updateActivePhaseTimerUi();
-        sendActivate(phaseToActivate);
+        showPhaseCallConfirmationDialog(phaseToActivate);
+    }
+
+    private void showPhaseCallConfirmationDialog(int phaseToActivate) {
+        new AlertDialog.Builder(this)
+                .setTitle("Подтверждение")
+                .setMessage("Вызвать фазу " + phaseToActivate + "?")
+                .setPositiveButton("Вызвать", (dialog, which) -> {
+                    lastCalledPhaseStartedAtMs = System.currentTimeMillis();
+                    updateActivePhaseTimerUi();
+                    sendActivate(phaseToActivate);
+                })
+                .setNegativeButton("Отмена", null)
+                .show();
     }
 
     private void sendActivate(int phase) {
@@ -538,8 +550,7 @@ public class VpuActivity extends AppCompatActivity {
         pendingUntilMs = System.currentTimeMillis() + CONFIRM_TIMEOUT_MS;
         updatePhaseButtonsUi();
 
-        // единственное уведомление по ТЗ
-        Toast.makeText(this, "Команда отправлена", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Команда отправлена, фаза будет вызвана по истечении времени безопасности.", Toast.LENGTH_LONG).show();
 
         piApi.activate(new ActivateRequest(phase)).enqueue(new Callback<ActivateResponse>() {
             @Override
