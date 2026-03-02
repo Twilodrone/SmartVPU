@@ -4,6 +4,7 @@ import android.content.res.ColorStateList;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ public class VpuActivity extends AppCompatActivity {
     private TextView addressTextView;
     private TextView pageTextView;
     private TextView manualTimerTextView;
+    private TextView activePhaseTimerTextView;
     private SwitchMaterial manualToggle;
     private SwitchMaterial[] phaseCallSwitches;
     private ImageView wifiIcon;
@@ -58,6 +60,7 @@ public class VpuActivity extends AppCompatActivity {
 
     // State from Pi
     private int currentPhaseFromPi = 0;
+    private long lastCalledPhaseStartedAtMs = 0;
     private boolean manualAllowed = true;        // разрешение РУ от контроллера
     private boolean manualRequestActive = false;  // реально включён запрос РУ на сервере
 
@@ -98,6 +101,7 @@ public class VpuActivity extends AppCompatActivity {
         @Override
         public void run() {
             updateManualTimerUi();
+            updateActivePhaseTimerUi();
             // тикер крутится всегда, но дешево: просто раз в секунду обновляет текст
             ruHandler.postDelayed(this, 1000);
         }
@@ -138,6 +142,7 @@ public class VpuActivity extends AppCompatActivity {
         viewPager = findViewById(R.id.viewPager);
         pageTextView = findViewById(R.id.pageTextView);
         manualTimerTextView = findViewById(R.id.manualTimerTextView);
+        activePhaseTimerTextView = findViewById(R.id.activePhaseTimerTextView);
         manualToggle = findViewById(R.id.manualToggle);
         wifiIcon = findViewById(R.id.wifiIcon);
         phaseButtons = new MaterialButton[] {
@@ -176,6 +181,7 @@ public class VpuActivity extends AppCompatActivity {
         setManualButtonState(false, false);
         updatePhaseButtonsUi();
         updateManualTimerUi();
+        updateActivePhaseTimerUi();
 
         viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
             @Override
@@ -315,6 +321,7 @@ public class VpuActivity extends AppCompatActivity {
         manualAllowed = false;
         manualRequestActive = false;
         wantManualRequest = false;
+        currentPhaseFromPi = 0;
 
         stopRuTimer();
         updateManualTimerUi();
@@ -359,6 +366,23 @@ public class VpuActivity extends AppCompatActivity {
 
         manualTimerTextView.setText(String.format(Locale.getDefault(),
                 "ВЫКЛ:(%02d:%02d)", mm, ss));
+    }
+
+    private void updateActivePhaseTimerUi() {
+        if (activePhaseTimerTextView == null) return;
+
+        if (lastCalledPhaseStartedAtMs <= 0) {
+            activePhaseTimerTextView.setText("Фаза активна: --:--");
+            return;
+        }
+
+        long elapsedMs = Math.max(0, System.currentTimeMillis() - lastCalledPhaseStartedAtMs);
+        long totalSec = elapsedMs / 1000;
+        long mm = totalSec / 60;
+        long ss = totalSec % 60;
+
+        activePhaseTimerTextView.setText(String.format(Locale.getDefault(),
+                "Фаза активна: %02d:%02d", mm, ss));
     }
 
     // ---------------- UI helpers ----------------
@@ -422,11 +446,25 @@ public class VpuActivity extends AppCompatActivity {
     private void updatePhaseButtonsUi() {
         if (phaseButtons == null) return;
 
+        int availablePhases = Math.min(imageUrls.size(), Math.min(phaseButtons.length, phaseCallSwitches.length));
         int shownPhase = viewPager.getCurrentItem() + 1;
         boolean enabled = !commandInProgress && consecutiveFails < 3;
         boolean phaseCallsEnabled = manualAllowed && wantManualRequest && enabled;
         for (int i = 0; i < phaseButtons.length; i++) {
             MaterialButton button = phaseButtons[i];
+            SwitchMaterial phaseSwitch = phaseCallSwitches[i];
+            boolean phaseAvailableForCall = i < availablePhases;
+
+            button.setVisibility(phaseAvailableForCall ? View.VISIBLE : View.GONE);
+            View switchContainer = (View) phaseSwitch.getParent();
+            switchContainer.setVisibility(phaseAvailableForCall ? View.VISIBLE : View.GONE);
+
+            if (!phaseAvailableForCall) {
+                button.setEnabled(false);
+                phaseSwitch.setEnabled(false);
+                continue;
+            }
+
             int phase = i + 1;
             boolean active = currentPhaseFromPi == phase;
             boolean shown = shownPhase == phase;
@@ -439,7 +477,6 @@ public class VpuActivity extends AppCompatActivity {
             button.setStrokeColor(ColorStateList.valueOf(COLOR_VIEWING_STROKE));
             button.setAlpha(active || shown ? 1.0f : 0.7f);
 
-            SwitchMaterial phaseSwitch = phaseCallSwitches[i];
             phaseSwitch.setEnabled(phaseCallsEnabled);
             phaseSwitch.setThumbTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_OK : COLOR_SURFACE_DIM));
             phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_PHASE_DIM : COLOR_SURFACE_DIM));
@@ -490,6 +527,8 @@ public class VpuActivity extends AppCompatActivity {
 
         if (!manualAllowed || !wantManualRequest || commandInProgress) return;
 
+        lastCalledPhaseStartedAtMs = System.currentTimeMillis();
+        updateActivePhaseTimerUi();
         sendActivate(phaseToActivate);
     }
 

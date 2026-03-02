@@ -266,6 +266,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent" />
 
+            <TextView
+                android:id="@+id/activePhaseTimerTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|start"
+                android:layout_margin="10dp"
+                android:padding="8dp"
+                android:text="Фаза активна: --:--"
+                android:textColor="#E8EEF9"
+                android:textSize="13sp"
+                android:background="#263554"/>
+
             <!-- подпись фазы -->
             <TextView
                 android:id="@+id/pageTextView"
