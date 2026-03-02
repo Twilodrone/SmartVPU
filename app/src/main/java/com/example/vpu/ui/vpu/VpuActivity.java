@@ -439,7 +439,7 @@ public class VpuActivity extends AppCompatActivity {
         for (int i = 0; i < phaseCallSwitches.length; i++) {
             final int phase = i + 1;
             phaseCallSwitches[i].setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (phaseSwitchesInternalUpdate || !buttonView.isPressed()) return;
+                if (phaseSwitchesInternalUpdate) return;
 
                 if (!isChecked) {
                     onPhaseSwitchDeactivated(phase);
