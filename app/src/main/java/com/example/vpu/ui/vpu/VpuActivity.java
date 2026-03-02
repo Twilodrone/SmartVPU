@@ -119,11 +119,18 @@ public class VpuActivity extends AppCompatActivity {
 
     private boolean manualToggleInternalUpdate = false;
     private boolean phaseSwitchesInternalUpdate = false;
+    private int activePhaseCallSwitch = 0;
+
+    private static final String STATE_ACTIVE_PHASE_CALL_SWITCH = "state_active_phase_call_switch";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vpu);
+
+        if (savedInstanceState != null) {
+            activePhaseCallSwitch = savedInstanceState.getInt(STATE_ACTIVE_PHASE_CALL_SWITCH, 0);
+        }
 
         objectId = getIntent().getIntExtra("objectId", -1);
         imageUrls = getIntent().getStringArrayListExtra("images");
@@ -213,6 +220,12 @@ public class VpuActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt(STATE_ACTIVE_PHASE_CALL_SWITCH, activePhaseCallSwitch);
+    }
+
+    @Override
     protected void onStart() {
         super.onStart();
         startPolling();
@@ -229,6 +242,7 @@ public class VpuActivity extends AppCompatActivity {
 
         //stopRuTimer();
         wantManualRequest = false;
+        activePhaseCallSwitch = 0;
         //safeManualOff();
 
         ruHandler.removeCallbacks(ruTickerRunnable);
@@ -278,6 +292,7 @@ public class VpuActivity extends AppCompatActivity {
                     // если контроллер запретил РУ — сбрасываем желание + стоп таймер
                     if (!manualAllowed) {
                         wantManualRequest = false;
+                        activePhaseCallSwitch = 0;
                         stopRuTimer();
                         updateManualTimerUi();
                     }
@@ -323,6 +338,7 @@ public class VpuActivity extends AppCompatActivity {
         manualRequestActive = false;
         wantManualRequest = false;
         currentPhaseFromPi = 0;
+        activePhaseCallSwitch = 0;
 
         stopRuTimer();
         updateManualTimerUi();
@@ -435,11 +451,15 @@ public class VpuActivity extends AppCompatActivity {
         for (int i = 0; i < phaseCallSwitches.length; i++) {
             final int phase = i + 1;
             phaseCallSwitches[i].setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (phaseSwitchesInternalUpdate || !isChecked) return;
+                if (phaseSwitchesInternalUpdate || !buttonView.isPressed()) return;
+
+                if (!isChecked) {
+                    onPhaseSwitchDeactivated(phase);
+                    return;
+                }
+
+                if (activePhaseCallSwitch == phase) return;
                 onPhaseSwitchActivated(phase);
-                phaseSwitchesInternalUpdate = true;
-                buttonView.setChecked(false);
-                phaseSwitchesInternalUpdate = false;
             });
         }
     }
@@ -470,6 +490,7 @@ public class VpuActivity extends AppCompatActivity {
             boolean active = currentPhaseFromPi == phase;
             boolean shown = shownPhase == phase;
             int color = active ? COLOR_OK : COLOR_PHASE_DIM;
+            boolean phaseSwitchActive = manualAllowed && wantManualRequest && activePhaseCallSwitch == phase;
 
             button.setEnabled(true);
             button.setBackgroundTintList(ColorStateList.valueOf(color));
@@ -478,9 +499,13 @@ public class VpuActivity extends AppCompatActivity {
             button.setStrokeColor(ColorStateList.valueOf(COLOR_VIEWING_STROKE));
             button.setAlpha(active || shown ? 1.0f : 0.7f);
 
+            phaseSwitchesInternalUpdate = true;
+            phaseSwitch.setChecked(phaseSwitchActive);
+            phaseSwitchesInternalUpdate = false;
+
             phaseSwitch.setEnabled(phaseCallsEnabled);
-            phaseSwitch.setThumbTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_OK : COLOR_SURFACE_DIM));
-            phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_PHASE_DIM : COLOR_SURFACE_DIM));
+            phaseSwitch.setThumbTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_OK : COLOR_BAD));
+            phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_PHASE_DIM : COLOR_BAD));
             phaseSwitch.setAlpha(phaseCallsEnabled ? 1.0f : 0.45f);
         }
     }
@@ -492,6 +517,7 @@ public class VpuActivity extends AppCompatActivity {
         if (!enabled) {
             // выключаем
             wantManualRequest = false;
+            activePhaseCallSwitch = 0;
             stopRuTimer();
             updateManualTimerUi();
 
@@ -523,11 +549,25 @@ public class VpuActivity extends AppCompatActivity {
         }
     }
 
+    private void onPhaseSwitchDeactivated(int phaseToDeactivate) {
+        if (!manualAllowed || !wantManualRequest || commandInProgress) return;
+        if (activePhaseCallSwitch != phaseToDeactivate) return;
+
+        activePhaseCallSwitch = 0;
+        if (pendingPhase == phaseToDeactivate) {
+            pendingPhase = -1;
+            commandInProgress = false;
+        }
+        updatePhaseButtonsUi();
+    }
+
     private void onPhaseSwitchActivated(int phaseToActivate) {
         resetRuTimerIfNeeded();
 
         if (!manualAllowed || !wantManualRequest || commandInProgress) return;
 
+        activePhaseCallSwitch = phaseToActivate;
+        updatePhaseButtonsUi();
         showPhaseCallConfirmationDialog(phaseToActivate);
     }
 
