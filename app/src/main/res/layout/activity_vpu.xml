@@ -91,6 +91,15 @@
                     android:textColor="#E8EEF9"
                     android:textSize="30sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/manualTimerTextView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:text="ВЫКЛ:(-:-)"
+                    android:textColor="#A7B3C9"
+                    android:textSize="13sp" />
             </LinearLayout>
             <LinearLayout
                 android:layout_width="match_parent"
@@ -111,11 +120,12 @@
             </LinearLayout>
 
             <TextView
-                android:id="@+id/hintTextView"
+                android:id="@+id/indicationhintTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:text="Кнопки 1-8 переключают просмотр. Для вызова фаз используйте свитчи ниже."
+                android:text="Посмотреть фазу:"
+                android:gravity="center"
                 android:textColor="#A7B3C9"
                 android:textSize="13sp" />
 
@@ -130,7 +140,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton1"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="1"
@@ -139,7 +149,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton2"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="2"
@@ -148,7 +158,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton3"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="3"
@@ -157,7 +167,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton4"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="4"
@@ -165,7 +175,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton5"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="5"
@@ -174,7 +184,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton6"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="6"
@@ -183,7 +193,7 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton7"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="7"
@@ -192,12 +202,22 @@
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton8"
                     style="@style/Widget.Material3.Button"
-                    android:layout_width="60dp"
+                    android:layout_width="55dp"
                     android:layout_height="60dp"
                     android:layout_marginHorizontal="3dp"
                     android:text="8"
                     app:cornerRadius="999dp" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/activatehintTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Вызвать фазу:"
+                android:gravity="center"
+                android:textColor="#A7B3C9"
+                android:textSize="13sp" />
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -206,31 +226,15 @@
                 android:gravity="center"
                 android:orientation="horizontal">
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:paddingHorizontal="4dp">
-
-                    <com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/>
-                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф1" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/>
-                </LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф2" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф3" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф4" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф5" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф6" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф7" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
-                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="4dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch8" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф8" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф1" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф2" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф3" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф4" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф5" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф6" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф7" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
+                <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="7dp"><com.google.android.material.switchmaterial.SwitchMaterial android:id="@+id/phaseCallSwitch8" android:layout_width="wrap_content" android:layout_height="wrap_content" android:rotation="270" android:scaleX="1.5" android:scaleY="1.5"/><TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Ф8" android:textColor="#E8EEF9" android:textSize="12sp" android:layout_gravity="center_horizontal"/></LinearLayout>
             </LinearLayout>
-            <TextView
-                android:id="@+id/manualTimerTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
-                android:text="Таймер РУ: —"
-                android:textColor="#A7B3C9"
-                android:textSize="13sp" />
 
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>

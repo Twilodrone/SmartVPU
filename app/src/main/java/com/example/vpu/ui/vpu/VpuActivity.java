@@ -346,7 +346,7 @@ public class VpuActivity extends AppCompatActivity {
         if (manualTimerTextView == null) return;
 
         if (!wantManualRequest || ruExpireAtMs <= 0) {
-            manualTimerTextView.setText("Таймер РУ: —");
+            manualTimerTextView.setText("ВЫКЛ:(-:-)");
             return;
         }
 
@@ -358,7 +358,7 @@ public class VpuActivity extends AppCompatActivity {
         long ss = totalSec % 60;
 
         manualTimerTextView.setText(String.format(Locale.getDefault(),
-                "Таймер РУ: %02d:%02d", mm, ss));
+                "ВЫКЛ:(%02d:%02d)", mm, ss));
     }
 
     // ---------------- UI helpers ----------------
