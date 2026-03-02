@@ -32,6 +32,8 @@ import retrofit2.Response;
 
 public class VpuActivity extends AppCompatActivity {
 
+    private static final String STATE_LAST_CALLED_PHASE_STARTED_AT_MS = "state_last_called_phase_started_at_ms";
+
     // UI
     private ViewPager2 viewPager;
     private TextView statusTextView;
@@ -123,6 +125,10 @@ public class VpuActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_vpu);
+
+        if (savedInstanceState != null) {
+            lastCalledPhaseStartedAtMs = savedInstanceState.getLong(STATE_LAST_CALLED_PHASE_STARTED_AT_MS, 0);
+        }
 
         objectId = getIntent().getIntExtra("objectId", -1);
         imageUrls = getIntent().getStringArrayListExtra("images");
@@ -231,6 +237,12 @@ public class VpuActivity extends AppCompatActivity {
         //safeManualOff();
 
         ruHandler.removeCallbacks(ruTickerRunnable);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(STATE_LAST_CALLED_PHASE_STARTED_AT_MS, lastCalledPhaseStartedAtMs);
     }
 
     // ---------------- Polling ----------------
@@ -482,6 +494,20 @@ public class VpuActivity extends AppCompatActivity {
             phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_PHASE_DIM : COLOR_SURFACE_DIM));
             phaseSwitch.setAlpha(phaseCallsEnabled ? 1.0f : 0.45f);
         }
+
+        if (!phaseCallsEnabled) {
+            resetPhaseCallSwitches();
+        }
+    }
+
+    private void resetPhaseCallSwitches() {
+        if (phaseCallSwitches == null) return;
+
+        phaseSwitchesInternalUpdate = true;
+        for (SwitchMaterial phaseSwitch : phaseCallSwitches) {
+            phaseSwitch.setChecked(false);
+        }
+        phaseSwitchesInternalUpdate = false;
     }
 
     // ---------------- Actions ----------------
@@ -493,6 +519,7 @@ public class VpuActivity extends AppCompatActivity {
             wantManualRequest = false;
             stopRuTimer();
             updateManualTimerUi();
+            resetPhaseCallSwitches();
 
             manualOffInProgress = true;
             manualOffGuardUntilMs = System.currentTimeMillis() + MANUAL_OFF_GUARD_MS;
