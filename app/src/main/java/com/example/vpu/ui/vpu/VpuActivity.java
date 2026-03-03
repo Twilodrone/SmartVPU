@@ -89,6 +89,8 @@ public class VpuActivity extends AppCompatActivity {
     private final Runnable ruAutoOffRunnable = () -> {
         if (wantManualRequest) {
             wantManualRequest = false;
+            activePhaseCallSwitch = 0;
+            resetActivePhaseTimer();
             stopRuTimer();
             safeManualOff();
             setManualButtonState(manualAllowed, false);
@@ -122,6 +124,7 @@ public class VpuActivity extends AppCompatActivity {
     private boolean phaseSwitchesInternalUpdate = false;
     private int activePhaseCallSwitch = 0;
     private static final String STATE_ACTIVE_PHASE_CALL_SWITCH = "state_active_phase_call_switch";
+    private static final String STATE_WANT_MANUAL_REQUEST = "state_want_manual_request";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,6 +132,8 @@ public class VpuActivity extends AppCompatActivity {
 
         if (savedInstanceState != null) {
             lastCalledPhaseStartedAtMs = savedInstanceState.getLong(STATE_LAST_CALLED_PHASE_STARTED_AT_MS, 0);
+            activePhaseCallSwitch = savedInstanceState.getInt(STATE_ACTIVE_PHASE_CALL_SWITCH, 0);
+            wantManualRequest = savedInstanceState.getBoolean(STATE_WANT_MANUAL_REQUEST, false);
         }
 
         objectId = getIntent().getIntExtra("objectId", -1);
@@ -221,6 +226,8 @@ public class VpuActivity extends AppCompatActivity {
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(STATE_LAST_CALLED_PHASE_STARTED_AT_MS, lastCalledPhaseStartedAtMs);
+        outState.putInt(STATE_ACTIVE_PHASE_CALL_SWITCH, activePhaseCallSwitch);
+        outState.putBoolean(STATE_WANT_MANUAL_REQUEST, wantManualRequest);
     }
 
     @Override
@@ -237,13 +244,6 @@ public class VpuActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         stopPolling();
-
-        //stopRuTimer();
-        wantManualRequest = false;
-        activePhaseCallSwitch = 0;
-        activePhaseCallSwitch = 0;
-        //safeManualOff();
-
         ruHandler.removeCallbacks(ruTickerRunnable);
     }
 
@@ -292,6 +292,7 @@ public class VpuActivity extends AppCompatActivity {
                     if (!manualAllowed) {
                         wantManualRequest = false;
                         activePhaseCallSwitch = 0;
+                        resetActivePhaseTimer();
                         stopRuTimer();
                         updateManualTimerUi();
                     }
@@ -338,6 +339,7 @@ public class VpuActivity extends AppCompatActivity {
         wantManualRequest = false;
         currentPhaseFromPi = 0;
         activePhaseCallSwitch = 0;
+        resetActivePhaseTimer();
 
         stopRuTimer();
         updateManualTimerUi();
@@ -399,6 +401,11 @@ public class VpuActivity extends AppCompatActivity {
 
         activePhaseTimerTextView.setText(String.format(Locale.getDefault(),
                 "Фаза активна: %02d:%02d", mm, ss));
+    }
+
+    private void resetActivePhaseTimer() {
+        lastCalledPhaseStartedAtMs = 0;
+        updateActivePhaseTimerUi();
     }
 
     // ---------------- UI helpers ----------------
@@ -532,6 +539,7 @@ public class VpuActivity extends AppCompatActivity {
             // выключаем
             wantManualRequest = false;
             activePhaseCallSwitch = 0;
+            resetActivePhaseTimer();
             stopRuTimer();
             updateManualTimerUi();
             resetPhaseCallSwitches();
