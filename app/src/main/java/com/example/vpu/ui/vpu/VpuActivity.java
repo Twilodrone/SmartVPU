@@ -603,8 +603,15 @@ public class VpuActivity extends AppCompatActivity {
                     updateActivePhaseTimerUi();
                     sendActivate(phaseToActivate);
                 })
-                .setNegativeButton("Отмена", null)
+                .setNegativeButton("Отмена", (dialog, which) -> resetPhaseCallSelection(phaseToActivate))
+                .setOnCancelListener(dialog -> resetPhaseCallSelection(phaseToActivate))
                 .show();
+    }
+
+    private void resetPhaseCallSelection(int phase) {
+        if (activePhaseCallSwitch != phase) return;
+        activePhaseCallSwitch = 0;
+        updatePhaseButtonsUi();
     }
 
     private void sendActivate(int phase) {
