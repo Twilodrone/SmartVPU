@@ -85,6 +85,7 @@ public class VpuActivity extends AppCompatActivity {
     private static final long MANUAL_OFF_GUARD_MS = 3000; // 3s
     private long manualOptimisticUntilMs = 0;
     private static final long MANUAL_OPTIMISTIC_MS = 1500;
+    private static final boolean FEATURE_PHASE_CALL_CANCEL = false;
 
 
     private final Runnable ruAutoOffRunnable = () -> {
@@ -464,7 +465,7 @@ public class VpuActivity extends AppCompatActivity {
                 if (phaseSwitchesInternalUpdate || !buttonView.isPressed()) return;
 
                 if (!isChecked) {
-                    onPhaseSwitchDeactivated(phase);
+                    onPhaseSwitchDeactivationAttempt(phase);
                     return;
                 }
 
@@ -472,6 +473,18 @@ public class VpuActivity extends AppCompatActivity {
                 onPhaseSwitchActivated(phase);
             });
         }
+    }
+
+    private void onPhaseSwitchDeactivationAttempt(int phaseToDeactivate) {
+        if (activePhaseCallSwitch != phaseToDeactivate) return;
+
+        phaseSwitchesInternalUpdate = true;
+        phaseCallSwitches[phaseToDeactivate - 1].setChecked(true);
+        phaseSwitchesInternalUpdate = false;
+
+        Toast.makeText(this,
+                "для отключения фазы вызовите другую или отключите РУ",
+                Toast.LENGTH_LONG).show();
     }
 
     private void updatePhaseButtonsUi() {
@@ -577,19 +590,6 @@ public class VpuActivity extends AppCompatActivity {
         if (phaseToActivate - 1 < imageUrls.size()) {
             viewPager.setCurrentItem(phaseToActivate - 1, true);
         }
-    }
-
-    private void onPhaseSwitchDeactivated(int phaseToDeactivate) {
-        if (!manualAllowed || !wantManualRequest) return;
-        if (activePhaseCallSwitch != phaseToDeactivate) return;
-
-        cancelPhaseCall(phaseToDeactivate);
-        activePhaseCallSwitch = 0;
-        if (pendingPhase == phaseToDeactivate) {
-            pendingPhase = -1;
-            commandInProgress = false;
-        }
-        updatePhaseButtonsUi();
     }
 
     private void onPhaseSwitchActivated(int phaseToActivate) {
@@ -702,6 +702,8 @@ public class VpuActivity extends AppCompatActivity {
     }
 
     private void cancelPhaseCall(int phase) {
+        if (!FEATURE_PHASE_CALL_CANCEL) return;
+
         try {
             piApi.cancelActivate(new CancelActivateRequest(phase)).enqueue(new Callback<Object>() {
                 @Override
