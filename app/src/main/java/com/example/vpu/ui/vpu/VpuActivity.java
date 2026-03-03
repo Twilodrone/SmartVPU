@@ -531,7 +531,7 @@ public class VpuActivity extends AppCompatActivity {
             phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_PHASE_DIM : COLOR_BAD));
             phaseSwitch.setAlpha(phaseCallsEnabled ? 1.0f : 0.45f);
         }
-        if (!phaseCallsEnabled) {
+        if (!manualAllowed || !wantManualRequest) {
             resetPhaseCallSwitches();
         }
     }
