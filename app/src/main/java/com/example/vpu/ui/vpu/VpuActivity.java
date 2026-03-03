@@ -10,6 +10,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -32,8 +33,6 @@ import retrofit2.Response;
 
 public class VpuActivity extends AppCompatActivity {
 
-    private static final String STATE_LAST_CALLED_PHASE_STARTED_AT_MS = "state_last_called_phase_started_at_ms";
-
     // UI
     private ViewPager2 viewPager;
     private TextView statusTextView;
@@ -45,6 +44,7 @@ public class VpuActivity extends AppCompatActivity {
     private SwitchMaterial[] phaseCallSwitches;
     private ImageView wifiIcon;
     private MaterialButton[] phaseButtons;
+    private static final String STATE_LAST_CALLED_PHASE_STARTED_AT_MS = "state_last_called_phase_started_at_ms";
 
     // Data
     private int objectId;
@@ -120,7 +120,8 @@ public class VpuActivity extends AppCompatActivity {
 
     private boolean manualToggleInternalUpdate = false;
     private boolean phaseSwitchesInternalUpdate = false;
-
+    private int activePhaseCallSwitch = 0;
+    private static final String STATE_ACTIVE_PHASE_CALL_SWITCH = "state_active_phase_call_switch";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -216,6 +217,11 @@ public class VpuActivity extends AppCompatActivity {
         super.onUserInteraction();
         resetRuTimerIfNeeded();
     }
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(STATE_LAST_CALLED_PHASE_STARTED_AT_MS, lastCalledPhaseStartedAtMs);
+    }
 
     @Override
     protected void onStart() {
@@ -234,15 +240,11 @@ public class VpuActivity extends AppCompatActivity {
 
         //stopRuTimer();
         wantManualRequest = false;
+        activePhaseCallSwitch = 0;
+        activePhaseCallSwitch = 0;
         //safeManualOff();
 
         ruHandler.removeCallbacks(ruTickerRunnable);
-    }
-
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putLong(STATE_LAST_CALLED_PHASE_STARTED_AT_MS, lastCalledPhaseStartedAtMs);
     }
 
     // ---------------- Polling ----------------
@@ -289,6 +291,7 @@ public class VpuActivity extends AppCompatActivity {
                     // если контроллер запретил РУ — сбрасываем желание + стоп таймер
                     if (!manualAllowed) {
                         wantManualRequest = false;
+                        activePhaseCallSwitch = 0;
                         stopRuTimer();
                         updateManualTimerUi();
                     }
@@ -334,6 +337,7 @@ public class VpuActivity extends AppCompatActivity {
         manualRequestActive = false;
         wantManualRequest = false;
         currentPhaseFromPi = 0;
+        activePhaseCallSwitch = 0;
 
         stopRuTimer();
         updateManualTimerUi();
@@ -446,11 +450,15 @@ public class VpuActivity extends AppCompatActivity {
         for (int i = 0; i < phaseCallSwitches.length; i++) {
             final int phase = i + 1;
             phaseCallSwitches[i].setOnCheckedChangeListener((buttonView, isChecked) -> {
-                if (phaseSwitchesInternalUpdate || !isChecked) return;
+                if (phaseSwitchesInternalUpdate || !buttonView.isPressed()) return;
+
+                if (!isChecked) {
+                    onPhaseSwitchDeactivated(phase);
+                    return;
+                }
+
+                if (activePhaseCallSwitch == phase) return;
                 onPhaseSwitchActivated(phase);
-                phaseSwitchesInternalUpdate = true;
-                buttonView.setChecked(false);
-                phaseSwitchesInternalUpdate = false;
             });
         }
     }
@@ -481,6 +489,7 @@ public class VpuActivity extends AppCompatActivity {
             boolean active = currentPhaseFromPi == phase;
             boolean shown = shownPhase == phase;
             int color = active ? COLOR_OK : COLOR_PHASE_DIM;
+            boolean phaseSwitchActive = manualAllowed && wantManualRequest && activePhaseCallSwitch == phase;
 
             button.setEnabled(true);
             button.setBackgroundTintList(ColorStateList.valueOf(color));
@@ -489,12 +498,15 @@ public class VpuActivity extends AppCompatActivity {
             button.setStrokeColor(ColorStateList.valueOf(COLOR_VIEWING_STROKE));
             button.setAlpha(active || shown ? 1.0f : 0.7f);
 
+            phaseSwitchesInternalUpdate = true;
+            phaseSwitch.setChecked(phaseSwitchActive);
+            phaseSwitchesInternalUpdate = false;
+
             phaseSwitch.setEnabled(phaseCallsEnabled);
-            phaseSwitch.setThumbTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_OK : COLOR_SURFACE_DIM));
-            phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseCallsEnabled ? COLOR_PHASE_DIM : COLOR_SURFACE_DIM));
+            phaseSwitch.setThumbTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_OK : COLOR_BAD));
+            phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_PHASE_DIM : COLOR_BAD));
             phaseSwitch.setAlpha(phaseCallsEnabled ? 1.0f : 0.45f);
         }
-
         if (!phaseCallsEnabled) {
             resetPhaseCallSwitches();
         }
@@ -508,7 +520,9 @@ public class VpuActivity extends AppCompatActivity {
             phaseSwitch.setChecked(false);
         }
         phaseSwitchesInternalUpdate = false;
+
     }
+
 
     // ---------------- Actions ----------------
 
@@ -517,6 +531,7 @@ public class VpuActivity extends AppCompatActivity {
         if (!enabled) {
             // выключаем
             wantManualRequest = false;
+            activePhaseCallSwitch = 0;
             stopRuTimer();
             updateManualTimerUi();
             resetPhaseCallSwitches();
@@ -549,14 +564,39 @@ public class VpuActivity extends AppCompatActivity {
         }
     }
 
+    private void onPhaseSwitchDeactivated(int phaseToDeactivate) {
+        if (!manualAllowed || !wantManualRequest || commandInProgress) return;
+        if (activePhaseCallSwitch != phaseToDeactivate) return;
+
+        activePhaseCallSwitch = 0;
+        if (pendingPhase == phaseToDeactivate) {
+            pendingPhase = -1;
+            commandInProgress = false;
+        }
+        updatePhaseButtonsUi();
+    }
+
     private void onPhaseSwitchActivated(int phaseToActivate) {
         resetRuTimerIfNeeded();
 
         if (!manualAllowed || !wantManualRequest || commandInProgress) return;
 
-        lastCalledPhaseStartedAtMs = System.currentTimeMillis();
-        updateActivePhaseTimerUi();
-        sendActivate(phaseToActivate);
+        activePhaseCallSwitch = phaseToActivate;
+        updatePhaseButtonsUi();
+        showPhaseCallConfirmationDialog(phaseToActivate);
+    }
+
+    private void showPhaseCallConfirmationDialog(int phaseToActivate) {
+        new AlertDialog.Builder(this)
+                .setTitle("Подтверждение")
+                .setMessage("Вызвать фазу " + phaseToActivate + "?")
+                .setPositiveButton("Вызвать", (dialog, which) -> {
+                    lastCalledPhaseStartedAtMs = System.currentTimeMillis();
+                    updateActivePhaseTimerUi();
+                    sendActivate(phaseToActivate);
+                })
+                .setNegativeButton("Отмена", null)
+                .show();
     }
 
     private void sendActivate(int phase) {
@@ -565,8 +605,7 @@ public class VpuActivity extends AppCompatActivity {
         pendingUntilMs = System.currentTimeMillis() + CONFIRM_TIMEOUT_MS;
         updatePhaseButtonsUi();
 
-        // единственное уведомление по ТЗ
-        Toast.makeText(this, "Команда отправлена", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Команда отправлена, фаза будет вызвана по истечении времени безопасности.", Toast.LENGTH_LONG).show();
 
         piApi.activate(new ActivateRequest(phase)).enqueue(new Callback<ActivateResponse>() {
             @Override
