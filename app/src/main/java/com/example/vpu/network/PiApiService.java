@@ -2,6 +2,7 @@ package com.example.vpu.network;
 
 import com.example.vpu.network.dto.ActivateRequest;
 import com.example.vpu.network.dto.ActivateResponse;
+import com.example.vpu.network.dto.CancelActivateRequest;
 import com.example.vpu.network.dto.PiStatusResponse;
 
 import retrofit2.Call;
@@ -15,5 +16,6 @@ public interface PiApiService {
     @POST("api/manual/on") Call<Object> manualOn();
     @POST("api/manual/off") Call<Object> manualOff();
     @POST("api/activate") Call<ActivateResponse> activate(@Body ActivateRequest body);
+    @POST("api/activate/cancel") Call<Object> cancelActivate(@Body CancelActivateRequest body);
 
 }

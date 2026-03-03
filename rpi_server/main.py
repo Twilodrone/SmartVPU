@@ -68,6 +68,8 @@ manual_request_out: Optional[DigitalOutputDevice] = None
 # ====== STATE ======
 command_lock = threading.Lock()
 last_command_ts = 0.0
+cancel_command_event = threading.Event()
+active_command_phase: Optional[int] = None
 
 phase_history = deque(maxlen=HISTORY_LEN)
 
@@ -92,6 +94,10 @@ last_manual_request: Optional[bool] = None
 
 class ActivateRequest(BaseModel):
     phase: int
+
+
+class CancelActivateRequest(BaseModel):
+    phase: Optional[int] = None
 
 
 class ObjectInfoResponse(BaseModel):
@@ -490,7 +496,7 @@ def manual_off(req: Request):
 
 @app.post("/api/activate")
 def activate(body: ActivateRequest, req: Request):
-    global last_command_ts
+    global last_command_ts, active_command_phase
 
     if body.phase not in phase_outputs:
         raise HTTPException(400, "Unknown phase")
@@ -515,6 +521,8 @@ def activate(body: ActivateRequest, req: Request):
 
     try:
         last_command_ts = now
+        cancel_command_event.clear()
+        active_command_phase = body.phase
 
         out = phase_outputs[body.phase]
 
@@ -522,8 +530,16 @@ def activate(body: ActivateRequest, req: Request):
         print_gpio_state("BEFORE PULSE")
 
         out.on()
-        time.sleep(PULSE_SECONDS)
+        pulse_deadline = time.time() + PULSE_SECONDS
+        while time.time() < pulse_deadline:
+            if cancel_command_event.is_set():
+                break
+            time.sleep(0.02)
         out.off()
+
+        if cancel_command_event.is_set():
+            print_gpio_state("ACTIVATION CANCELED")
+            return {"accepted": False, "phase": body.phase, "cancelled": True}
 
         # === ВАЖНО: удержание РУ +15 минут после активации ===
         with manual_lock:
@@ -534,7 +550,32 @@ def activate(body: ActivateRequest, req: Request):
 
         return {"accepted": True, "phase": body.phase}
     finally:
+        active_command_phase = None
+        cancel_command_event.clear()
         command_lock.release()
+
+
+@app.post("/api/activate/cancel")
+def cancel_activate(body: Optional[CancelActivateRequest] = None):
+    phase = body.phase if body is not None else None
+
+    if phase is not None and phase not in phase_outputs:
+        raise HTTPException(400, "Unknown phase")
+
+    current_phase = active_command_phase
+    if current_phase is None:
+        return {"ok": True, "cancelled": False, "reason": "No active command"}
+
+    if phase is not None and phase != current_phase:
+        return {
+            "ok": True,
+            "cancelled": False,
+            "reason": f"Different phase is active ({current_phase})",
+            "activePhase": current_phase,
+        }
+
+    cancel_command_event.set()
+    return {"ok": True, "cancelled": True, "phase": current_phase}
 
 
 # Совместимость со старым названием

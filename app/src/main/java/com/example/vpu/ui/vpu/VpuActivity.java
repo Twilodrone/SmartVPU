@@ -20,6 +20,7 @@ import com.example.vpu.network.PiApiService;
 import com.example.vpu.network.PiRetrofitClient;
 import com.example.vpu.network.dto.ActivateRequest;
 import com.example.vpu.network.dto.ActivateResponse;
+import com.example.vpu.network.dto.CancelActivateRequest;
 import com.example.vpu.network.dto.PiStatusResponse;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.switchmaterial.SwitchMaterial;
@@ -88,6 +89,9 @@ public class VpuActivity extends AppCompatActivity {
 
     private final Runnable ruAutoOffRunnable = () -> {
         if (wantManualRequest) {
+            if (activePhaseCallSwitch > 0) {
+                cancelPhaseCall(activePhaseCallSwitch);
+            }
             wantManualRequest = false;
             activePhaseCallSwitch = 0;
             resetActivePhaseTimer();
@@ -537,6 +541,9 @@ public class VpuActivity extends AppCompatActivity {
 
         if (!enabled) {
             // выключаем
+            if (activePhaseCallSwitch > 0) {
+                cancelPhaseCall(activePhaseCallSwitch);
+            }
             wantManualRequest = false;
             activePhaseCallSwitch = 0;
             resetActivePhaseTimer();
@@ -573,9 +580,10 @@ public class VpuActivity extends AppCompatActivity {
     }
 
     private void onPhaseSwitchDeactivated(int phaseToDeactivate) {
-        if (!manualAllowed || !wantManualRequest || commandInProgress) return;
+        if (!manualAllowed || !wantManualRequest) return;
         if (activePhaseCallSwitch != phaseToDeactivate) return;
 
+        cancelPhaseCall(phaseToDeactivate);
         activePhaseCallSwitch = 0;
         if (pendingPhase == phaseToDeactivate) {
             pendingPhase = -1;
@@ -690,6 +698,21 @@ public class VpuActivity extends AppCompatActivity {
             });
         } catch (Exception ignored) {
             manualOffInProgress = false;
+        }
+    }
+
+    private void cancelPhaseCall(int phase) {
+        try {
+            piApi.cancelActivate(new CancelActivateRequest(phase)).enqueue(new Callback<Object>() {
+                @Override
+                public void onResponse(Call<Object> call, Response<Object> response) {
+                }
+
+                @Override
+                public void onFailure(Call<Object> call, Throwable t) {
+                }
+            });
+        } catch (Exception ignored) {
         }
     }
 }
