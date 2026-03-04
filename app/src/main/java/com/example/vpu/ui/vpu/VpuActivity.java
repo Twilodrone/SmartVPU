@@ -394,8 +394,15 @@ public class VpuActivity extends AppCompatActivity {
     private void updateActivePhaseTimerUi() {
         if (activePhaseTimerTextView == null) return;
 
+        int activePhase = activePhaseCallSwitch > 0 ? activePhaseCallSwitch : currentPhaseFromPi;
+        if (activePhase <= 0) {
+            activePhaseTimerTextView.setText("Фаза -- активна: --:--");
+            return;
+        }
+
         if (lastCalledPhaseStartedAtMs <= 0) {
-            activePhaseTimerTextView.setText("Фаза активна: --:--");
+            activePhaseTimerTextView.setText(String.format(Locale.getDefault(),
+                    "Фаза %d активна: --:--", activePhase));
             return;
         }
 
@@ -405,7 +412,7 @@ public class VpuActivity extends AppCompatActivity {
         long ss = totalSec % 60;
 
         activePhaseTimerTextView.setText(String.format(Locale.getDefault(),
-                "Фаза активна: %02d:%02d", mm, ss));
+                "Фаза %d активна: %02d:%02d", activePhase, mm, ss));
     }
 
     private void resetActivePhaseTimer() {
