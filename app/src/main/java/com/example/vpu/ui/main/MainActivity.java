@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         ArrayList<String> images = new ArrayList<>();
 
-        String base = "http://192.168.1.10:8001/files/3649/2026.02.19/";
+        String base = "http://192.168.1.10:8000/files/3649/2026.02.19/";
         images.add(base + "1.jpg");
         images.add(base + "2.jpg");
         images.add(base + "3.jpg");

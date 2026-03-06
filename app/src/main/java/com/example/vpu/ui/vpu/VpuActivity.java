@@ -87,6 +87,7 @@ public class VpuActivity extends AppCompatActivity {
     private static final long MANUAL_OPTIMISTIC_MS = 1500;
     private static final boolean FEATURE_PHASE_CALL_CANCEL = false;
 
+    private int activePhaseCallSwitch = 0;
 
     private final Runnable ruAutoOffRunnable = () -> {
         if (wantManualRequest) {
@@ -127,7 +128,7 @@ public class VpuActivity extends AppCompatActivity {
 
     private boolean manualToggleInternalUpdate = false;
     private boolean phaseSwitchesInternalUpdate = false;
-    private int activePhaseCallSwitch = 0;
+
     private static final String STATE_ACTIVE_PHASE_CALL_SWITCH = "state_active_phase_call_switch";
     private static final String STATE_WANT_MANUAL_REQUEST = "state_want_manual_request";
     @Override
@@ -376,7 +377,7 @@ public class VpuActivity extends AppCompatActivity {
         if (manualTimerTextView == null) return;
 
         if (!wantManualRequest || ruExpireAtMs <= 0) {
-            manualTimerTextView.setText("ВЫКЛ:(-:-)");
+            manualTimerTextView.setText(" ");
             return;
         }
 
@@ -388,7 +389,7 @@ public class VpuActivity extends AppCompatActivity {
         long ss = totalSec % 60;
 
         manualTimerTextView.setText(String.format(Locale.getDefault(),
-                "ВЫКЛ:(%02d:%02d)", mm, ss));
+                "Автоматическое отключение РУ:%02d:%02d", mm, ss));
     }
 
     private void updateActivePhaseTimerUi() {
@@ -396,13 +397,13 @@ public class VpuActivity extends AppCompatActivity {
 
         int activePhase = activePhaseCallSwitch > 0 ? activePhaseCallSwitch : currentPhaseFromPi;
         if (activePhase <= 0) {
-            activePhaseTimerTextView.setText("Фаза -- активна: --:--");
+            activePhaseTimerTextView.setText("Нажмите на переключатель для вызова фазы");
             return;
         }
 
         if (lastCalledPhaseStartedAtMs <= 0) {
             activePhaseTimerTextView.setText(String.format(Locale.getDefault(),
-                    "Фаза %d активна: --:--", activePhase));
+                    "Нажмите на переключатель для вызова фазы", activePhase));
             return;
         }
 
@@ -519,7 +520,7 @@ public class VpuActivity extends AppCompatActivity {
             int phase = i + 1;
             boolean active = currentPhaseFromPi == phase;
             boolean shown = shownPhase == phase;
-            int color = active ? COLOR_OK : COLOR_PHASE_DIM;
+            int color = active ? COLOR_OK : COLOR_SURFACE_DIM;
             boolean phaseSwitchActive = manualAllowed && wantManualRequest && activePhaseCallSwitch == phase;
 
             button.setEnabled(true);
@@ -535,7 +536,7 @@ public class VpuActivity extends AppCompatActivity {
 
             phaseSwitch.setEnabled(phaseCallsEnabled);
             phaseSwitch.setThumbTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_OK : COLOR_BAD));
-            phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_PHASE_DIM : COLOR_BAD));
+            phaseSwitch.setTrackTintList(ColorStateList.valueOf(phaseSwitchActive ? COLOR_PHASE_DIM : COLOR_SURFACE_DIM));
             phaseSwitch.setAlpha(phaseCallsEnabled ? 1.0f : 0.45f);
         }
         if (!manualAllowed || !wantManualRequest) {
