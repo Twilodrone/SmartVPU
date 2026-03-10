@@ -608,6 +608,11 @@ public class VpuActivity extends AppCompatActivity {
         activePhaseCallSwitch = phaseToActivate;
         updatePhaseButtonsUi();
         showPhaseCallConfirmationDialog(phaseToActivate);
+        resetRuTimerIfNeeded();
+
+        if (phaseToActivate - 1 < imageUrls.size()) {
+            viewPager.setCurrentItem(phaseToActivate - 1, true);
+        }
     }
 
     private void showPhaseCallConfirmationDialog(int phaseToActivate) {

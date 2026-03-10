@@ -33,6 +33,12 @@
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
+                <ImageView
+                    android:id="@+id/logocodd"
+                    android:layout_width="200dp"
+                    android:layout_height="80dp"
+                    android:layout_marginStart="1dp"
+                    android:src="@drawable/logo_codd_text" />
                 <TextView
                     android:id="@+id/titleTextView"
                     android:layout_width="0dp"
@@ -55,7 +61,7 @@
             <!-- строка статус + РУ -->
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="93dp"
+                android:layout_height="66dp"
                 android:layout_marginTop="10dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
@@ -141,7 +147,7 @@
             <LinearLayout
                 android:id="@+id/phaseButtonsRow"
                 android:layout_width="match_parent"
-                android:layout_height="81dp"
+                android:layout_height="68dp"
                 android:layout_marginTop="8dp"
                 android:gravity="center"
                 android:orientation="horizontal">
@@ -181,6 +187,7 @@
                     android:layout_marginHorizontal="3dp"
                     android:text="4"
                     app:cornerRadius="999dp" />
+
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/phaseButton5"
                     style="@style/Widget.Material3.Button"
