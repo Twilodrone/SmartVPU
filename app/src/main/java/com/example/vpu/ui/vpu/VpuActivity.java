@@ -606,6 +606,7 @@ public class VpuActivity extends AppCompatActivity {
         if (!manualAllowed || !wantManualRequest || commandInProgress) return;
 
         activePhaseCallSwitch = phaseToActivate;
+        resetActivePhaseTimer();
         updatePhaseButtonsUi();
         showPhaseCallConfirmationDialog(phaseToActivate);
         resetRuTimerIfNeeded();
@@ -620,8 +621,6 @@ public class VpuActivity extends AppCompatActivity {
                 .setTitle("Подтверждение")
                 .setMessage("Вызвать фазу " + phaseToActivate + "?")
                 .setPositiveButton("Вызвать", (dialog, which) -> {
-                    lastCalledPhaseStartedAtMs = System.currentTimeMillis();
-                    updateActivePhaseTimerUi();
                     sendActivate(phaseToActivate);
                 })
                 .setNegativeButton("Отмена", (dialog, which) -> resetPhaseCallSelection(phaseToActivate))
@@ -663,6 +662,13 @@ public class VpuActivity extends AppCompatActivity {
     }
 
     private void checkConfirmation() {
+        if (activePhaseCallSwitch > 0
+                && currentPhaseFromPi == activePhaseCallSwitch
+                && lastCalledPhaseStartedAtMs <= 0) {
+            lastCalledPhaseStartedAtMs = System.currentTimeMillis();
+            updateActivePhaseTimerUi();
+        }
+
         if (!commandInProgress || pendingPhase <= 0) return;
 
         if (currentPhaseFromPi == pendingPhase) {
